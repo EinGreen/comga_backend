@@ -58,3 +58,4 @@ def get_user():
             "userId": user_info[0][0], "username": user_info[0][1], "email": user_info[0][2], "bio": user_info[0][3], "birthdate": user_info[0][4], "imageUrl": user_info[0][5], "bannerUrl": user_info[0][6]}
         log_json = json.dumps(logged_in_dictionary, default=str)
         return Response(log_json, mimetype="application/json", status=201)
+
