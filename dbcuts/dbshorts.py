@@ -1,5 +1,5 @@
 import mariadb
-import dbconnect
+from . import dbconnect
 import traceback
 import string
 import random

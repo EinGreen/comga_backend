@@ -1,5 +1,5 @@
 import mariadb
-import dbcreds
+from . import dbcreds
 import traceback
 
 def get_db_connection():
