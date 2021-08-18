@@ -27,3 +27,6 @@ def show_content():
             "artist": comga[5]}
         comga_json = json.dumps(comga_dictionary, default=str)
         return Response(comga_json, mimetype="application/json", status=201)
+
+# def create_content():
+#     try: 

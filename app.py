@@ -1,4 +1,3 @@
-import traceback
 from flask import Flask
 import sys
 
@@ -9,25 +8,25 @@ from usercuts import logins, user
 # user
 @app.get("/api/user")
 def see_user_info():
-    user.get_user()
+    return user.get_user()
 @app.post("/api/newuser")
 def create_user():
-    user.create_user()
+    return user.create_user()
 @app.delete("/api/user")
 def delete_user():
-    user.delete_user()
+    return user.delete_user()
 # Login
 @app.post("/api/login")
 def login():
-    logins.login()
+    return logins.login()
 @app.delete("/api/logout")
 def logout():
-    logins.logout()
-
+    return logins.logout()
+# The Content
 from contentcuts import content
 @app.get("/api/content")
 def get_comics():
-    content.show_content()
+    return content.show_content()
 
 if(len(sys.argv) > 1):
     mode = sys.argv[1]

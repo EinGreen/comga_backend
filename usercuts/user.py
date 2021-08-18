@@ -4,7 +4,6 @@ from flask import request, Response
 import json
 
 # creating new user
-# TODO: try and make it so that it can get the image_url
 def create_user():
     try:
         username = request.json["username"]
@@ -12,9 +11,11 @@ def create_user():
         user_pass = request.json["password"]
         is_author = bool(request.json.get("is_author"))
         salt = dbshorts.create_salt()
+    except KeyError:
+        return Response("Please enter required data", mimetype='text/plain', status=401)
     except:
         traceback.print_exc()
-        print("Welp, something went wrong")
+        print("Yeah, something went wrong with collecting the json data in create_user")
         return Response("Data Error, request invalid", mimetype="text/plain", status=400)
     hash_pass = dbshorts.create_hash_pass(salt, user_pass)
 
@@ -32,14 +33,17 @@ def create_user():
         print(f"{username} was successfully created!")
         return Response(newuser_json, mimetype="application/json", status=201)
 
+# see user info
 def get_user():
     try:
         user_id = request.json["userId"]
+    except ValueError:
+        return Response("Invalid user ID", mimetype='text/plain', status=422)
     except IndexError:
         return Response("User not found", mimetype="text/plain", status=404)
     except:
         traceback.print_exc()
-        print("I have no idea what happened, but something went wrong")
+        print("Cannot find user info")
         return Response("Data Error", mimetype="text/plain", status=400)
 
     user_info = dbshorts.run_selection("select u.id, username, email, image_url, from users u inner join user_session us on u.id = us.user_id where us.user_id=?", 
@@ -54,6 +58,7 @@ def get_user():
         log_json = json.dumps(logged_in_dictionary, default=str)
         return Response(log_json, mimetype="application/json", status=201)
 
+# remove user
 def delete_user():
     try:
         token = str(request.json['loginToken'])
