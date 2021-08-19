@@ -30,6 +30,9 @@ def get_comics():
 @app.post("/api/content")
 def post_comic():
     return content.create_content()
+@app.delete("/api/content")
+def delete_content():
+    return content.delete_content()
 
 
 
