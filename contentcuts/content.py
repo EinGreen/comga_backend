@@ -31,6 +31,7 @@ def show_content():
 def create_content():
     try: 
         token = str(request.json["loginToken"])
+        user_id = str(request.json["posterId"])
         read_type = str(request.json["read_type"])
         title = str(request.json["title"])
         author = str(request.json["author"])
@@ -50,16 +51,16 @@ def create_content():
         return Response("User not authorized to post content", mimetype="text/plain", status=401)
     elif(is_author == True):
         if(attributes == None or ""):
-            new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist) values (?,?,?,?,?)",
-                                                 [read_type, title, author, cover, artist])
+            new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, poster_id) values (?,?,?,?,?,?)",
+                                                 [read_type, title, author, cover, artist, user_id])
         elif(attributes != None or ""):
-            new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, attributes) values (?,?,?,?,?,?)",
-                                                 [read_type, title, author, cover, artist, attributes])
+            new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, attributes) values (?,?,?,?,?,?,?)",
+                                                 [read_type, title, author, cover, artist, attributes, user_id])
 
     if(new_content == None or ""):
         return Response("Database Error, something went wrong on our end, sorry mate", mimetype="text/plain", status=500)
     else:
-        content_info = dbshorts.run_selection("from mvp_comga select c.id, c.read_type, c.title, c.author, c.cover, c.artist, c.`attributes`, c.date_posted from content c", [])
+        content_info = dbshorts.run_selection("from mvp_comga select c.id, c.read_type, c.title, c.author, c.cover, c.artist, c.`attributes`, c.date_posted, c.poster_id from content c", [])
         content_dictionary = {"contentId": content_info[0][0],
                               "readType": content_info[0][1],
                               "title": content_info[0][2],
@@ -67,7 +68,8 @@ def create_content():
                               "cover": content_info[0][4],
                               "artist": content_info[0][5],
                               "attributes": content_info[0][6],
-                              "datePosted": content_info[0][7]}
+                              "datePosted": content_info[0][7],
+                              "posterId": content_info[0][8]}
         content_json = json.dumps(content_dictionary, default=str)
         print("SUCCESS [probably]")
         return Response(content_json, mimetype="application/json", status=201)
