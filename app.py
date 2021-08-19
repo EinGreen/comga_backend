@@ -27,6 +27,19 @@ from contentcuts import content
 @app.get("/api/content")
 def get_comics():
     return content.show_content()
+@app.post("/api/content")
+def post_comic():
+    return content.create_content()
+
+
+
+# # Master Controls
+# from mastercontrols import mastercontroler
+# @app.delete("/api/mastercontrol")
+# def kill_comic():
+#     return mastercontroler.kill_comic()
+
+
 
 if(len(sys.argv) > 1):
     mode = sys.argv[1]
