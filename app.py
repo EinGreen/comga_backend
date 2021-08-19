@@ -41,8 +41,9 @@ def delete_content():
 # @app.delete("/api/mastercontrol")
 # def kill_comic():
 #     return mastercontroler.kill_comic()
-
-
+# @app.delete("/api/mastercontrol")
+# def terminate_user():
+#     return mastercontroler.kill_user()
 
 if(len(sys.argv) > 1):
     mode = sys.argv[1]
