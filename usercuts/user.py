@@ -2,6 +2,7 @@ from dbcuts import dbshorts
 import traceback
 from flask import request, Response
 import json
+from . import checks
 
 # creating new user
 def create_user():
@@ -46,8 +47,7 @@ def get_user():
         print("Could not find user info")
         return Response("Data Error", mimetype="text/plain", status=400)
 
-    user_info = dbshorts.run_selection("select u.id, username, email, image_url from users u inner join user_session us on u.id = us.user_id where us.user_id=?", 
-                                        [user_id])
+    user_info = checks.check_user(user_id)
     if(user_info == None):
         return Response("User not logged in", mimetype="text/plain", status=500)
     elif(len(user_info) == 0):

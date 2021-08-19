@@ -2,6 +2,7 @@ from dbcuts import dbshorts
 import traceback
 from flask import request, Response
 import json
+from usercuts import checks
 
 def show_content():
     try:
@@ -45,8 +46,7 @@ def create_content():
         print("Okay, either you don't have a login token, or this api is going crazy... or both...")
         return Response("Data Error", mimetype="text/plain", status=400)
     
-    is_author = dbshorts.run_selection("select u.is_author from users u inner join user_session us on u.id = us.user_id where us.login_token = ?", 
-                                      [token])
+    is_author = checks.check_author(token)
     if(is_author == None or "" or False):
         return Response("User not authorized to post content", mimetype="text/plain", status=401)
     elif(is_author == True):
@@ -74,3 +74,20 @@ def create_content():
         print("SUCCESS [probably]")
         return Response(content_json, mimetype="application/json", status=201)
 
+def delete_content():
+    try:
+        token = str(request.json["loginToken"])
+        content_id = request.json["contentId"]
+    except:
+        traceback.print_exc()
+        print("You tried, but failed")
+
+    is_author = checks.check_author(token)
+    if(is_author != None):
+        rows = dbshorts.run_deletion("delete from content where id = ?", [content_id,])
+        if(rows == 1):
+            return Response("Content deleted", mimetype="text/plain", status=200)
+        else:
+            return Response("DB Error, deletion may have failed", mimetype="text/plain", status=500)
+    else:
+        return Response("Unauthorized", mimetype="text/plain", status=401)
