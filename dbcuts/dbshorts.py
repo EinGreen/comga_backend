@@ -98,7 +98,7 @@ def create_hash_pass(salt, password):
     user_pass = salt + password
     hash_pass = hashlib.sha512(user_pass.encode()).hexdigest()
     return hash_pass
-
+# Finding hash_pass:
 def get_hash_pass(username, password):
     salt = get_salt(username)
     user_pass = salt + password

@@ -41,7 +41,9 @@ def close_db_connection(conn):
         traceback.print_exc()
         return False
 
-
+# I was lazy, so I put a function for closing the db
 def close_all(cursor, conn):
     close_db_cursor(cursor)
     close_db_connection(conn)
+
+#! Notice: this file is manditory for connecting to the database!
