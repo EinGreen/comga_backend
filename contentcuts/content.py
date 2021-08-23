@@ -6,7 +6,7 @@ from usercuts import checks
 
 def show_content():
     try:
-        comic_info = dbshorts.run_selection("select c.id, c.type, c.title, c.author, c.cover, c.artist from content c", [])
+        comic_info = dbshorts.run_selection("select c.id, c.read_type, c.title, c.author, c.cover, c.artist, c.status, c.tags, c.date_posted from content c;", [])
     except:
         traceback.print_exc()
         print("Sorry, can't get content")
@@ -17,57 +17,58 @@ def show_content():
     elif(len(comic_info) == 0):
         return Response("There are no Comics", mimetype="text/plain", status=404)
     else:
-        print(comic_info[0])
+        print(comic_info)
         for comga in comic_info:
-            comga_dictionary = {
-            "comgaId": comga[0],
-            "type": comga[1], 
-            "title": comga[2],
-            "author": comga[3], 
-            "cover": comga[4], 
-            "artist": comga[5]}
+            comga_dictionary = {"comgaId": comga[0],
+                                "type": comga[1],
+                                "title": comga[2],
+                                "author": comga[3],
+                                "cover": comga[4],
+                                "artist": comga[5]}
         comga_json = json.dumps(comga_dictionary, default=str)
         return Response(comga_json, mimetype="application/json", status=201)
 
 def create_content():
     try: 
         token = str(request.json["loginToken"])
-        user_id = str(request.json["posterId"])
-        read_type = str(request.json["read_type"])
+    except IndexError:
+        return Response("Data invalid", mimetype="text/plain", status=404)
+    except:
+        traceback.print_exc()
+        print("No Token given")
+        return Response("Data Error", mimetype="text/plain", status=400)
+    new_content = ""
+    is_author = checks.check_author(token)
+    if(is_author == None or "" or False):
+        return Response("User not authorized to post content", mimetype="text/plain", status=401)
+        
+    try: 
+        user_id = request.json["posterId"]
+        read_type = str(request.json["readType"])
         title = str(request.json["title"])
         author = str(request.json["author"])
         cover = str(request.json["cover"])
         artist = str(request.json["artist"])
         status = request.json.get("status")
         tags = request.json.get("tags")
-    except IndexError:
-        return Response("Data invalid", mimetype="text/plain", status=404)
     except:
         traceback.print_exc()
-        print("Okay, either you don't have a login token, or this api is going crazy... or both...")
-        return Response("Data Error", mimetype="text/plain", status=400)
-    
-    is_author = checks.check_author(token)
-    if(is_author == None or "" or False):
-        return Response("User not authorized to post content", mimetype="text/plain", status=401)
-    elif(is_author == True):
-        if((tags == None or "") and (status == None or "")):
-            new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, poster_id) values (?,?,?,?,?,?)",
-                                                 [read_type, title, author, cover, artist, user_id])
-        elif((tags != None or "") and (status == None or "")):
-            new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, tags, poster_id) values (?,?,?,?,?,?,?)",
-                                                 [read_type, title, author, cover, artist, tags, user_id])
-        elif((tags == None or "") and (status != None or "")):
-            new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, status, poster_id) values (?,?,?,?,?,?,?)",
-                                                 [read_type, title, author, cover, artist, status, user_id])
-        elif((tags != None or "") and (status != None or "")):
-            new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, status, tags, poster_id) values (?,?,?,?,?,?,?,?)",
-                                                 [read_type, title, author, cover, artist, status, tags, user_id])
-
-    if(new_content == None or ""):
-        return Response("Database Error, something went wrong on our end, sorry mate", mimetype="text/plain", status=500)
+        print("Can't post, thing went wrong")
+        return Response("Data Error, request invalid", mimetype="text/plain", status=400)
+    if((tags == None or "") and (status == None or "")):
+        new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, poster_id) values (?,?,?,?,?,?)",
+                                                [read_type, title, author, cover, artist, user_id])
+    elif(status == None or status == ""):
+        new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, tags, poster_id) values (?,?,?,?,?,?,?)",
+                                                [read_type, title, author, cover, artist, tags, user_id])
+    elif(tags == None or tags == ""):
+        new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, status, poster_id) values (?,?,?,?,?,?,?)",
+                                                [read_type, title, author, cover, artist, status, user_id])
     else:
-        content_info = dbshorts.run_selection("from mvp_comga select c.id, c.read_type, c.title, c.author, c.cover, c.artist, c.status, c.tags, c.date_posted, c.poster_id from content c", [])
+        new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, status, tags, poster_id) values (?,?,?,?,?,?,?,?)",
+                                                [read_type, title, author, cover, artist, status, tags, user_id])
+    if(new_content != None or new_content != ""):
+        content_info = dbshorts.run_selection("select c.id, c.read_type, c.title, c.author, c.cover, c.artist, c.status, c.tags, c.date_posted, c.poster_id from content c", [])
         content_dictionary = {"contentId": content_info[0][0],
                               "readType": content_info[0][1],
                               "title": content_info[0][2],
@@ -80,7 +81,10 @@ def create_content():
                               "posterId": content_info[0][9]}
         content_json = json.dumps(content_dictionary, default=str)
         print("SUCCESS [probably]")
+        print(content_dictionary)
         return Response(content_json, mimetype="application/json", status=201)
+    else:
+        return Response("Database Error, something went wrong on our end, sorry mate", mimetype="text/plain", status=500)
 
 def delete_content():
     try:

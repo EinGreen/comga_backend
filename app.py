@@ -22,6 +22,7 @@ def login():
 @app.delete("/api/logout")
 def logout():
     return logins.logout()
+
 # The Content
 from contentcuts import content
 @app.get("/api/content")
