@@ -1,4 +1,5 @@
 import mariadb
+from werkzeug.wrappers import response
 from . import dbconnect
 import traceback
 import string
@@ -37,9 +38,20 @@ def run_insertion(statement, params):
         conn.commit()
         result = cursor.lastrowid
     except mariadb.DataError:
+        traceback.print_exc()
         print("Bad Request, Database Error")
     except FileNotFoundError:
+        traceback.print_exc()
         print("Invalid request, was not found on the server")
+    except mariadb.ProgrammingError:
+        traceback.print_exc()
+        print("MariaDB ProgramingError")
+    except mariadb.OperationalError:
+        traceback.print_exc()
+        print("Operational Error within MariaDB")
+    except mariadb.IntegrityError:
+        traceback.print_exc()
+        print("Intergrity Error in MariaDB")
     except:
         traceback.print_exc()
         print("Unknown Error has occured")
@@ -57,7 +69,14 @@ def run_deletion(statement, params):
         conn.commit()
         result = cursor.rowcount
     except mariadb.ProgrammingError:
-        print("Could not find Table")
+        traceback.print_exc()
+        print("MariaDB ProgramingError")
+    except mariadb.OperationalError:
+        traceback.print_exc()
+        print("Operational Error within MariaDB")
+    except mariadb.IntegrityError:
+        traceback.print_exc()
+        print("Intergrity Error in MariaDB")
     except:
         traceback.print_exc()
         print("Nani? Bakana, I can't delete?")
@@ -74,6 +93,15 @@ def run_update(statement, params):
         cursor.execute(statement, params)
         conn.commit()
         result = cursor.rowcount
+    except mariadb.ProgrammingError:
+        traceback.print_exc()
+        print("MariaDB ProgramingError")
+    except mariadb.OperationalError:
+        traceback.print_exc()
+        print("Operational Error within MariaDB")
+    except mariadb.IntegrityError:
+        traceback.print_exc()
+        print("Intergrity Error in MariaDB")
     except:
         traceback.print_exc()
         print("Uh oh, I can't update for some reason")
