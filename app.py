@@ -35,8 +35,6 @@ def post_comic():
 def delete_content():
     return content.delete_content()
 
-
-
 # # Master Controls
 # from mastercontrols import mastercontroler
 # @app.delete("/api/mastercontrol")
@@ -54,7 +52,7 @@ else:
 
 if(mode == "production"):
     import bjoern
-    bjoern.run(app, "0.0.0.0", 5021)
+    bjoern.run(app, "0.0.0.0", 5069)
 elif(mode == "testing"):
     from flask_cors import CORS
     CORS(app)
