@@ -1,5 +1,4 @@
 import mariadb
-from werkzeug.wrappers import response
 from . import dbconnect
 import traceback
 import string
@@ -21,6 +20,12 @@ def run_selection(statement, params):
     except IndexError:
         traceback.print_exc()
         print("could not find")
+    except mariadb.ProgrammingError:
+        traceback.print_exc()
+        print("Programming Error")
+    except mariadb.DataError:
+        traceback.print_exc()
+        print("Bad Request, Database Error. Wait... isn't this a select statement? How is this possible?")
     except:
         traceback.print_exc()
         print("Some error has occured, I don't freakin know dude")
@@ -114,7 +119,7 @@ def create_salt():
     salt = ''.join(random.choice(letters_and_digits) for i in range(10))
     return salt
 
-def get_salt(username):
+def get_salt(username): #? Wait... that means the username has to be unique. This could pose a problem if not handled correctly
     user = run_selection("select salt from users where username=?", [username,])
     if(len(user) == 1):
         return user[0][0]
