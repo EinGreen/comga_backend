@@ -24,6 +24,7 @@ def logout():
     return logins.logout()
 
 # The Content
+#! Content has bugs
 from contentcuts import content
 @app.get("/api/content")
 def get_comics():
@@ -35,6 +36,8 @@ def post_comic():
 def delete_content():
     return content.delete_content()
 
+
+
 # # Master Controls
 # from mastercontrols import mastercontroler
 # @app.delete("/api/mastercontrol")
@@ -43,6 +46,8 @@ def delete_content():
 # @app.delete("/api/mastercontrol")
 # def terminate_user():
 #     return mastercontroler.kill_user()
+
+
 
 if(len(sys.argv) > 1):
     mode = sys.argv[1]
