@@ -46,10 +46,10 @@ def create_content():
     except:
         traceback.print_exc()
         return Response("A thing went wrong", mimetype="text/plain", status=400)
-    
+
     new_content = ""
     is_author = checks.check_author(token)
-    
+
     if(is_author == None or "" or False):
         return Response("User not authorized to post content", mimetype="text/plain", status=401)
     elif(is_author != None and len(is_author) != 0):
@@ -65,9 +65,9 @@ def create_content():
         else:
             new_content = dbshorts.run_insertion("insert into content (read_type, title, author, cover, artist, status, tags, poster_id) values (?,?,?,?,?,?,?,?)",
                                                  [read_type, title, author, cover, artist, status, tags, user_id])
-    
+
         if(new_content != None or new_content != ""):
-            content_info = dbshorts.run_selection("select c.id, c.read_type, c.title, c.author, c.cover, c.artist, c.status, c.tags, c.date_posted, c.poster_id from content c", [])
+            content_info = dbshorts.run_selection("select c.id, c.read_type, c.title, c.author, c.cover, c.artist, c.status, c.tags, c.date_posted, c.poster_id from content c where c.id = ?", [new_content,])
             content_dictionary = {"contentId": content_info[0][0],
                                 "readType": content_info[0][1],
                                 "title": content_info[0][2],
@@ -79,8 +79,6 @@ def create_content():
                                 "datePosted": content_info[0][8],
                                 "posterId": content_info[0][9]}
             content_json = json.dumps(content_dictionary, default=str)
-            print("SUCCESS [probably]")
-            print(content_dictionary)
             return Response(content_json, mimetype="application/json", status=201)
         else:
             return Response("Database Error, something went wrong on our end, sorry mate", mimetype="text/plain", status=500)
