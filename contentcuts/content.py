@@ -1,3 +1,4 @@
+from werkzeug.wrappers import response
 from dbcuts import dbshorts
 import traceback
 from flask import request, Response
@@ -42,7 +43,7 @@ def create_content():
     except IndexError:
         return Response("Data invalid", mimetype="text/plain", status=404)
     except KeyError:
-        return Response("Dude, some of this stuff is required, you have to put it in the thing", mimetype="text/plain", status=401)
+        return Response("Dude, some of this stuff is required, you have to put it in the thing", mimetype="text/plain", status=406)
     except:
         traceback.print_exc()
         return Response("A thing went wrong", mimetype="text/plain", status=400)
@@ -67,7 +68,8 @@ def create_content():
                                                  [read_type, title, author, cover, artist, status, tags, user_id])
 
         if(new_content != None or new_content != ""):
-            content_info = dbshorts.run_selection("select c.id, c.read_type, c.title, c.author, c.cover, c.artist, c.status, c.tags, c.date_posted, c.poster_id from content c where c.id = ?", [new_content,])
+            content_info = dbshorts.run_selection("select c.id, c.read_type, c.title, c.author, c.cover, c.artist, c.status, c.tags, c.date_posted, c.poster_id from content c where c.id = ?", 
+                                                  [new_content,])
             content_dictionary = {"contentId": content_info[0][0],
                                 "readType": content_info[0][1],
                                 "title": content_info[0][2],
@@ -102,4 +104,38 @@ def delete_content():
             return Response("DB Error, deletion may have failed", mimetype="text/plain", status=500)
     else:
         return Response("Unauthorized", mimetype="text/plain", status=401)
-    
+
+#! Under Testing    
+def add_tag():
+    try:
+        token = str(request.json["loginToken"])
+        content_id = request.json["contentId"]
+        tags = request.json["tags"]
+    except ValueError:
+        return Response("Invalid content ID, stupid", mimetype="text/plain", status=422)
+    except KeyError:
+        return Response("Maditory Stuff, needs the input dude", mimetype="text/plain", status=401)
+    except:
+        traceback.print_exc()
+        return Response("A thing went wrong", mimetype="text/plain", status=400)
+
+    user_id = checks.check_session(token)
+    tag_check = checks.tag_check(content_id)
+
+    print(tag_check)
+
+    if(user_id != None and content_id != None):
+        user_id = int(user_id[0][0])
+        if(tag_check != None or ""):
+            tags = tag_check[0][0] + tags
+        rows = dbshorts.run_update("from mvp_comga update content c set c.tags = ? where c.id = ?",
+                                          [tags, content_id])
+        if(rows != None or ""):
+            updated_tags = tag_check
+            return Response(updated_tags, mimetype="text/plain", status=200)
+        else:
+            return Response("Okay, for some reason you can't edit the tags. Bummer", mimetype='text/plain', status=500)
+    elif(user_id == None or ""):
+        return Response("User not found", mimetype="text/plain", status=404)
+    elif(content_id == None or ""):
+        return Response("Content not found", mimetype="text/plain", status=404)
